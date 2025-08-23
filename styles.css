@@ -2,7 +2,7 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    text-align: center; /* Center the content */
+    text-align: center;
 }
 
 header {
@@ -14,7 +14,7 @@ header {
     left: 0;
     width: 100%;
     z-index: 1000;
-    box-sizing: border-box; /* Include padding in width calculation */
+    box-sizing: border-box;
 }
 
 header h1 {
@@ -28,12 +28,12 @@ header h2 {
 
 nav {
     position: fixed;
-    top: 80px; /* Adjust based on header height */
+    top: 80px;
     left: 0;
     width: 100%;
     background-color: #333;
     z-index: 1000;
-    box-sizing: border-box; /* Include padding in width calculation */
+    box-sizing: border-box;
 }
 
 nav ul {
@@ -59,14 +59,14 @@ nav ul li a:hover {
 
 main {
     padding: 1em;
-    padding-top: 140px; /* Adjust to make room for the fixed header and nav */
-    padding-bottom: 400px; /* Enough padding for the fixed footer */
+    padding-top: 140px;
+    padding-bottom: 400px;
 }
 
 section {
     margin-bottom: 2em;
     position: relative;
-    scroll-margin-top: 140px; /* Adjust based on header and nav height */
+    scroll-margin-top: 140px;
 }
 
 section h2 {
@@ -75,49 +75,46 @@ section h2 {
     text-align: center;
     width: 100%;
     font-size: 1.5em;
-    margin: 1em 0; /* Adjust to add space between the header and the content */
+    margin: 1em 0;
 }
 
 section h2::before,
 section h2::after {
     content: "";
     position: absolute;
-    top: 70%; /* Reduce the height of the lines */
+    top: 70%;
     width: 100px;
     height: 3px;
     background-color: #F8741F;
 }
 
 section h2::before {
-    left: calc(50% - 200px); /* Adjust the value to move the line to the left */
+    left: calc(50% - 200px);
 }
 
 section h2::after {
-    right: calc(50% - 200px); /* Adjust the value to move the line to the right */
+    right: calc(50% - 200px);
 }
 
 .description {
     display: inline-block;
     text-align: left;
-    max-width: 900px; /* 450px left and right of the center line */
-    margin: 0 auto; /* Center the block */
-    padding: 0 1em; /* Optional padding for better readability */
-}
-
-.description {
-    margin-top: 0.5em; /* Space between header and description */
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 1em;
+    margin-top: 0.5em;
 }
 
 footer {
     background-color: #333;
     color: white;
     text-align: center;
-    padding: 0.0em; /* Adjust for smaller screens */
+    padding: 0.0em;
     position: fixed;
     bottom: 0;
     width: 100%;
     z-index: 1000;
-    box-sizing: border-box; /* Include padding in width calculation */
+    box-sizing: border-box;
 }
 
 .center-image {
@@ -133,8 +130,9 @@ footer {
     bottom: 50px;
     width: 150px;
     height: auto;
-    z-index: 1001; /* Higher than header and footer */
+    z-index: 1001;
 }
+
 .linkedin-logo {
     position: relative;
     display: inline-block;
@@ -142,7 +140,7 @@ footer {
 }
 
 .linkedin-logo img {
-    width: 80px; /* Adjust the size as needed */
+    width: 80px;
     height: auto;
     transition: transform 0.3s ease;
 }
@@ -161,9 +159,9 @@ footer {
     padding: 5px 0;
     position: absolute;
     z-index: 1;
-    bottom: 100%; /* Position above the logo */
+    bottom: 100%;
     left: 50%;
-    margin-left: -80px; /* Center the popup */
+    margin-left: -80px;
     opacity: 0;
     transition: opacity 0.3s ease;
 }
@@ -176,32 +174,32 @@ footer {
 /* Responsive Styles */
 @media (max-width: 768px) {
     header {
-        padding: 0.5em; /* Reduce padding for smaller screens */
+        padding: 0.5em;
         top: 0;
     }
 
     header h1 {
-        font-size: 1.5em; /* Reduce font size for smaller screens */
+        font-size: 1.5em;
     }
 
     header h2 {
-        font-size: 0.8em; /* Reduce font size for smaller screens */
+        font-size: 0.8em;
     }
 
     nav {
-        top: 55px; /* Adjust based on reduced header height */
+        top: 55px;
     }
 
     main {
-        padding-top: 140px; /* Maintain space for fixed header and nav */
-        padding-bottom: 100px; /* Enough padding for the footer */
+        padding-top: 140px;
+        padding-bottom: 100px;
     }
 
     section {
-        scroll-margin-top: 140px; /* Adjust based on header and nav height */
+        scroll-margin-top: 140px;
     }
 
     .description {
-        padding: 0 0.5em; /* Less padding for smaller screens */
+        padding: 0 0.5em;
     }
 }
