@@ -1,0 +1,207 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    text-align: center; /* Center the content */
+}
+
+header {
+    background-color: #F8741F;
+    color: black;
+    padding: 1em;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    box-sizing: border-box; /* Include padding in width calculation */
+}
+
+header h1 {
+    margin: 0;
+}
+
+header h2 {
+    font-size: 1em;
+    margin: 0;
+}
+
+nav {
+    position: fixed;
+    top: 80px; /* Adjust based on header height */
+    left: 0;
+    width: 100%;
+    background-color: #333;
+    z-index: 1000;
+    box-sizing: border-box; /* Include padding in width calculation */
+}
+
+nav ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+}
+
+nav ul li {
+    padding: 1em;
+}
+
+nav ul li a {
+    color: white;
+    text-decoration: none;
+}
+
+nav ul li a:hover {
+    text-decoration: underline;
+}
+
+main {
+    padding: 1em;
+    padding-top: 140px; /* Adjust to make room for the fixed header and nav */
+    padding-bottom: 400px; /* Enough padding for the fixed footer */
+}
+
+section {
+    margin-bottom: 2em;
+    position: relative;
+    scroll-margin-top: 140px; /* Adjust based on header and nav height */
+}
+
+section h2 {
+    display: inline-block;
+    position: relative;
+    text-align: center;
+    width: 100%;
+    font-size: 1.5em;
+    margin: 1em 0; /* Adjust to add space between the header and the content */
+}
+
+section h2::before,
+section h2::after {
+    content: "";
+    position: absolute;
+    top: 70%; /* Reduce the height of the lines */
+    width: 100px;
+    height: 3px;
+    background-color: #F8741F;
+}
+
+section h2::before {
+    left: calc(50% - 200px); /* Adjust the value to move the line to the left */
+}
+
+section h2::after {
+    right: calc(50% - 200px); /* Adjust the value to move the line to the right */
+}
+
+.description {
+    display: inline-block;
+    text-align: left;
+    max-width: 900px; /* 450px left and right of the center line */
+    margin: 0 auto; /* Center the block */
+    padding: 0 1em; /* Optional padding for better readability */
+}
+
+.description {
+    margin-top: 0.5em; /* Space between header and description */
+}
+
+footer {
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 0.0em; /* Adjust for smaller screens */
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    z-index: 1000;
+    box-sizing: border-box; /* Include padding in width calculation */
+}
+
+.center-image {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 20px auto;
+}
+
+.logo-image {
+    position: fixed;
+    right: 10px;
+    bottom: 50px;
+    width: 150px;
+    height: auto;
+    z-index: 1001; /* Higher than header and footer */
+}
+.linkedin-logo {
+    position: relative;
+    display: inline-block;
+    margin-top: 20px;
+}
+
+.linkedin-logo img {
+    width: 80px; /* Adjust the size as needed */
+    height: auto;
+    transition: transform 0.3s ease;
+}
+
+.linkedin-logo:hover img {
+    transform: scale(1.1);
+}
+
+.linkedin-logo .popup {
+    visibility: hidden;
+    width: 160px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1;
+    bottom: 100%; /* Position above the logo */
+    left: 50%;
+    margin-left: -80px; /* Center the popup */
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.linkedin-logo:hover .popup {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    header {
+        padding: 0.5em; /* Reduce padding for smaller screens */
+        top: 0;
+    }
+
+    header h1 {
+        font-size: 1.5em; /* Reduce font size for smaller screens */
+    }
+
+    header h2 {
+        font-size: 0.8em; /* Reduce font size for smaller screens */
+    }
+
+    nav {
+        top: 55px; /* Adjust based on reduced header height */
+    }
+
+    main {
+        padding-top: 140px; /* Maintain space for fixed header and nav */
+        padding-bottom: 100px; /* Enough padding for the footer */
+    }
+
+    section {
+        scroll-margin-top: 140px; /* Adjust based on header and nav height */
+    }
+
+    .description {
+        padding: 0 0.5em; /* Less padding for smaller screens */
+    }
+}
