@@ -1,18 +1,5 @@
 {
   "version": 1,
-  "include": [
-    "/hello",
-    "/r/*"
-  ],
-  "exclude": [
-    "/assets/*",
-    "/*.css",
-    "/*.js",
-    "/*.png",
-    "/*.jpg",
-    "/*.jpeg",
-    "/*.gif",
-    "/*.svg",
-    "/*.ico"
-  ]
+  "include": ["/*"],
+  "exclude": ["/assets/*"]
 }
