@@ -74,8 +74,8 @@ function buildHtml(deepLink, fallbackUrl) {
 <body style="font-family: system-ui; padding: 24px;">
   <h3>Opening PopBite…</h3>
   <p>If nothing happens, tap below:</p>
-  <p>${deepLink}Open PopBite</a></p>
-  <p>${fallbackUrl}Continue on the web</a></p>
+  <p><a href="${deepLink}">Open PopBite</a></p>
+  <p><a href="${fallbackUrl}">Continue on the web</a></p>
 
   <script>
     (function() {
