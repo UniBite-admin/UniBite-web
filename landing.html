@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>PopBite – Opening App…</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      background: linear-gradient(180deg, #B6D0E2, #7F9CE0);
+      color: #333;
+      text-align: center;
+      padding: 16px;
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 16px;
+      padding: 24px 20px;
+      max-width: 400px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      margin-top: 0;
+      font-size: 22px;
+    }
+    p {
+      font-size: 15px;
+      line-height: 1.5;
+    }
+    .spinner {
+      margin-top: 16px;
+      border: 4px solid #eee;
+      border-top: 4px solid #7F9CE0;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      animation: spin 0.8s linear infinite;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+  <h1>Opening PopBite…</h1>
+  <p>
+    One moment while we send you to the right app store.
+  </p>
+  <div class="spinner"></div>
+</div>
+
+<script>
+  (function() {
+    // 1) Get ref from query string
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get("ref") || "";
+
+    // 2) Device detection
+    const ua = navigator.userAgent || navigator.vendor || window.opera;
+    const isAndroid = /Android/i.test(ua);
+    const isIOS = /iPhone|iPad|iPod/i.test(ua);
+
+    // 3) Store URLs (TODO: replace with your real IDs)
+    const iosUrl = "https://apps.apple.com/app/idYOUR_APP_ID_HERE" + (ref ? ("?ref=" + encodeURIComponent(ref)) : "");
+    const androidUrl = "https://play.google.com/store/apps/details?id=com.popbite.app" + (ref ? ("&ref=" + encodeURIComponent(ref)) : "");
+    const webFallbackUrl = "https://unibite.app"; // or a marketing page
+
+    if (isIOS) {
+      window.location.href = iosUrl;
+    } else if (isAndroid) {
+      window.location.href = androidUrl;
+    } else {
+      // Desktop or unknown device → fallback website
+      window.location.href = webFallbackUrl;
+    }
+  })();
+</script>
+</body>
+</html>
