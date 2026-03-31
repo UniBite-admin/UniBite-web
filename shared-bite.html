@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>PopBite — Bite Preview</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/styles.css" />
+
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Roboto", sans-serif;
+      background: linear-gradient(#B6D0E2, #7F9CE0);
+      margin: 0; padding: 16px;
+      color: #333;
+    }
+    .container { max-width: 700px; margin: 0 auto; }
+
+    .card {
+      position: relative;
+      background: rgba(255,255,255,0.95);
+      border-radius: 16px;
+      padding: 16px 18px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+      margin-bottom: 12px;
+    }
+
+    .card h2 { margin: 0 0 8px; font-size: 18px; font-weight: 700; }
+    .card p { font-size: 15px; margin: 0; line-height: 1.4; }
+
+    .blur-overlay {
+      position: absolute; inset: 0; border-radius: inherit;
+      backdrop-filter: blur(6px);
+      background: rgba(255,255,255,0.6);
+    }
+
+    .install-box { text-align: center; margin-top: 24px; }
+    .install-button {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 14px 22px;
+      border-radius: 30px;
+      background: #7F9CE0;
+      color: white; text-decoration: none; font-size: 16px;
+      font-weight: 600;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+
+    .logo {
+      display: block;
+      margin: 0 auto 20px auto;
+      height: 55px;
+    }
+  </style>
+
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+    const supabaseUrl = "https://qxcofmbryadnwknjgflh.supabase.co";
+    const supabaseAnon = "YOUR_ANON_KEY_HERE"; // replace with your actual anon key
+    const supabase = createClient(supabaseUrl, supabaseAnon);
+
+    function getQueryParam(name) {
+      const url = new URL(window.location.href);
+      return url.searchParams.get(name);
+    }
+
+    async function loadBite(popBiteId) {
+      const { data, error } = await supabase
+        .from("pb_profiles")
+        .select(`
+          pop_bite_id,
+          subtopic,
+          title1, slide1,
+          title2, slide2,
+          title3, slide3,
+          title4, slide4,
+          title5, slide5,
+          title6, slide6
+        `)
+        .eq("pop_bite_id", popBiteId)
+        .maybeSingle();
+
+      if (error || !data) {
+        document.getElementById("content").innerHTML =
+          "<p>Could not load this PopBite.</p>";
+        return;
+      }
+
+      renderBite(data);
+    }
+
+    function addCard(container, title, text, blurred) {
+      const card = document.createElement("div");
+      card.className = "card";
+
+      const h2 = document.createElement("h2");
+      h2.textContent = title || "";
+      card.appendChild(h2);
+
+      const p = document.createElement("p");
+      p.textContent = text || "";
+      card.appendChild(p);
+
+      if (blurred) {
+        const o = document.createElement("div");
+        o.className = "blur-overlay";
+        card.appendChild(o);
+      }
+
+      container.appendChild(card);
+    }
+
+    function renderBite(bite) {
+      const container = document.getElementById("content");
+      container.innerHTML = "";
+
+      const titleEl = document.createElement("h1");
+      titleEl.textContent = bite.subtopic || "PopBite";
+      titleEl.style.color = "#23395D";
+      titleEl.style.fontSize = "22px";
+      titleEl.style.fontWeight = "700";
+      titleEl.style.textAlign = "center";
+      titleEl.style.marginBottom = "18px";
+      container.appendChild(titleEl);
+
+      // Slides 1–3 (visible)
+      addCard(container, bite.title1, bite.slide1, false);
+      addCard(container, bite.title2, bite.slide2, false);
+      addCard(container, bite.title3, bite.slide3, false);
+
+      // Slides 4–6 (blurred)
+      addCard(container, bite.title4, bite.slide4, true);
+      addCard(container, bite.title5, bite.slide5, true);
+      addCard(container, bite.title6, bite.slide6, true);
+    }
+
+    window.onload = () => {
+      const biteId = getQueryParam("bite");
+      if (!biteId) {
+        document.getElementById("content").innerHTML =
+          "<p>No bite found in link.</p>";
+        return;
+      }
+      loadBite(biteId);
+    };
+  </script>
+</head>
+
+<body>
+  <div class="container">
+    <img src="/assets/logo.png" class="logo" alt="PopBite Logo" />
+
+    <div id="content">Loading...</div>
+
+    <div class="install-box">
+      <p>Enjoying this PopBite?</p>
+      <a
+        class="install-button"
+        href="https://play.google.com/store/apps/details?id=com.unibite.popbite">
+        Install PopBite on Google Play
+      </a>
+    </div>
+  </div>
+</body>
+</html>
