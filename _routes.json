@@ -1,5 +1,13 @@
 {
   "version": 1,
-  "include": ["/*"],
-  "exclude": ["/assets/*"]
+  "routes": [
+    {
+      "pattern": "/r/*",
+      "function": { "path": "r/[code].js" }
+    },
+    {
+      "pattern": "/*",
+      "serve": { "path": "index.html" }
+    }
+  ]
 }
