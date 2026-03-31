@@ -1,19 +1,40 @@
+/**
+ * Cloudflare Pages Function for /r/<code>?bite=<id>
+ * 
+ * Responsibilities:
+ * 1. Log referral click via Supabase RPC
+ * 2. Maintain device_id for reward logic
+ * 3. Serve the shared-bite.html landing page ALWAYS
+ *    (Auto-open app will be handled later via Android App Links)
+ */
+
 export async function onRequest(context) {
   const { request, env, params } = context;
   const url = new URL(request.url);
 
-  const referralCode = params.code;               // /r/:code
-  const biteId = url.searchParams.get("bite") || "";
+  // -------------------------------
+  // Extract referral code + bite ID
+  // -------------------------------
+  const referralCode = params.code;
+  const biteId = url.searchParams.get("bite") || null;
 
-  // Read or set device cookie (unique-per-device)
+  // -------------------------------
+  // Device ID cookie (reward system)
+  // -------------------------------
   const cookieHeader = request.headers.get("Cookie") || "";
   let deviceId = readCookie(cookieHeader, "ub_device_id");
   const isNewDevice = !deviceId;
-  if (!deviceId) deviceId = crypto.randomUUID();
 
-  // Call Supabase RPC (anon)
-  const rpcUrl = `${env.SUPABASE_URL}/rest/v1/rpc/apply_link_click_reward`;
+  if (!deviceId) {
+    deviceId = crypto.randomUUID();
+  }
+
+  // -------------------------------
+  // Trigger Supabase RPC (reward logic)
+  // -------------------------------
   try {
+    const rpcUrl = `${env.SUPABASE_URL}/rest/v1/rpc/apply_link_click_reward`;
+
     await fetch(rpcUrl, {
       method: "POST",
       headers: {
@@ -24,23 +45,21 @@ export async function onRequest(context) {
       body: JSON.stringify({
         p_referral_code: referralCode,
         p_device_id: deviceId,
-        p_bite_id: biteId || null,
+        p_bite_id: biteId,
       }),
     });
-  } catch (_) {}
+  } catch (e) {
+    console.log("RPC error:", e);
+  }
 
-  // Deep link
-  const deepLink =
-    `popbite://referral?code=${encodeURIComponent(referralCode)}` +
-    `&bite=${encodeURIComponent(biteId)}`;
+  // -------------------------------
+  // Serve shared-bite.html ALWAYS
+  // -------------------------------
+  const landing = await context.env.ASSETS.fetch(
+    new URL("/shared-bite.html", request.url)
+  );
 
-  // Fallback to website
-  const fallbackUrl = `https://unibite.app/?ref=${encodeURIComponent(referralCode)}`;
-
-  // HTML that tries app then falls back
-  const html = buildHtml(deepLink, fallbackUrl);
-
-  const response = new Response(html, {
+  const response = new Response(landing.body, {
     status: 200,
     headers: {
       "Content-Type": "text/html; charset=UTF-8",
@@ -48,6 +67,9 @@ export async function onRequest(context) {
     },
   });
 
+  // -------------------------------
+  // Set device cookie if new
+  // -------------------------------
   if (isNewDevice) {
     response.headers.append(
       "Set-Cookie",
@@ -58,40 +80,10 @@ export async function onRequest(context) {
   return response;
 }
 
+// -------------------------------
+// Cookie reader
+// -------------------------------
 function readCookie(cookieHeader, name) {
   const match = cookieHeader.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
   return match ? decodeURIComponent(match[1]) : null;
-}
-
-function buildHtml(deepLink, fallbackUrl) {
-  return `<!doctype html>
-<html>
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Opening PopBite…</title>
-</head>
-<body style="font-family: system-ui; padding: 24px;">
-  <h3>Opening PopBite…</h3>
-  <p>If nothing happens, tap below:</p>
-  <p><a href="${deepLink}">Open PopBite</a></p>
-  <p><a href="${fallbackUrl}">Continue on the web</a></p>
-
-  <script>
-    (function() {
-      var deep = ${JSON.stringify(deepLink)};
-      var fallback = ${JSON.stringify(fallbackUrl)};
-      var start = Date.now();
-
-      window.location.href = deep;
-
-      setTimeout(function() {
-        if (Date.now() - start < 2200) {
-          window.location.href = fallback;
-        }
-      }, 1200);
-    })();
-  </script>
-</body>
-</html>`;
 }
