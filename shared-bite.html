@@ -1,7 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
+<!DOCTYPE html>< <meta charset="UTF-8" />
   <title>PopBite – Bite Preview</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
@@ -15,28 +12,10 @@
       min-height: 100vh;
     }
 
-    /* CTA at top */
-    .cta {
-      position: fixed;
-      top: 14px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 1000;
-    }
-
-    .install-button {
-      padding: 12px 26px;
-      background: #7F9CE0;
-      color: #fff;
-      border-radius: 28px;
-      font-weight: 600;
-      text-decoration: none;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.18);
-    }
-
     .container {
       max-width: 700px;
-      margin: 120px auto 40px auto;
+      margin: 40px auto 40px auto;
+      padding-top: 20px;
     }
 
     /* Horizontal slider */
@@ -48,7 +27,7 @@
       padding: 0 20px;
     }
 
-    /* Slide card */
+    /* Card */
     .slide {
       flex: 0 0 90%;
       scroll-snap-align: center;
@@ -59,17 +38,13 @@
       position: relative;
     }
 
-    /* readable title */
     .slide h2 {
       margin-top: 0;
       font-size: 20px;
       font-weight: 700;
       color: #23395D;
-      position: relative;
-      z-index: 2;
     }
 
-    /* blurred body ONLY */
     .slide p {
       font-size: 16px;
       line-height: 1.45;
@@ -77,26 +52,31 @@
       margin: 0;
     }
 
+    /* BODY blur */
     .locked-body {
       filter: blur(4px);
       opacity: 0.55;
     }
 
-    /* overlay above blurred text */
+    /* TITLE slight blur */
+    .locked-title {
+      filter: blur(1px);
+      opacity: 0.85;
+    }
+
+    /* overlay */
     .overlay-lock {
       position: absolute;
       inset: 0;
       border-radius: 20px;
-      background: rgba(255,255,255,0.55);
-      backdrop-filter: blur(6px);
+      background: rgba(255,255,255,0.35);
+      backdrop-filter: blur(4px);
       z-index: 10;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 14px;
     }
 
-    /* The button INSIDE overlay */
     .overlay-btn {
       background: #7F9CE0;
       color: white;
@@ -106,18 +86,15 @@
       font-weight: 600;
       font-size: 15px;
       box-shadow: 0 3px 8px rgba(0,0,0,0.25);
-      z-index: 11;
-      position: relative;
-      filter: none !important;
     }
 
-    /* SLIDE DOTS */
+    /* Dots */
     .dots {
       width: 100%;
       display: flex;
       justify-content: center;
       gap: 8px;
-      margin-top: 18px;
+      margin-top: 16px;
     }
 
     .dot {
@@ -129,7 +106,7 @@
     }
 
     .dot.active {
-      background: #23395D; /* app primaryDark */
+      background: #23395D;
       transform: scale(1.25);
     }
   </style>
@@ -188,6 +165,7 @@
 
         const title = document.createElement("h2");
         title.textContent = s.title;
+        if (s.locked) title.className = "locked-title";
         card.appendChild(title);
 
         const body = document.createElement("p");
@@ -211,7 +189,7 @@
         sliderEl.appendChild(card);
       });
 
-      /* --- CREATE DOTS --- */
+      // Create dots
       const dotsContainer = document.getElementById("dots");
       dotsContainer.innerHTML = "";
 
@@ -221,14 +199,13 @@
         dotsContainer.appendChild(d);
       });
 
-      /* --- UPDATE DOTS ON SCROLL --- */
+      // Update dots
       sliderEl.addEventListener("scroll", () => {
         const slideWidth = sliderEl.children[0].offsetWidth + 20;
-
         const index = Math.round(sliderEl.scrollLeft / slideWidth);
 
-        const allDots = dotsContainer.querySelectorAll(".dot");
-        allDots.forEach((dot, i) => {
+        const dots = dotsContainer.querySelectorAll(".dot");
+        dots.forEach((dot, i) => {
           if (i === index) dot.classList.add("active");
           else dot.classList.remove("active");
         });
@@ -244,14 +221,14 @@
 
 <body>
 
-  <div class="cta">
-    <a class="install-button"
-       href="https://play.google.com/store/apps/details?id=com.unibite.popbite">
-      Install PopBite on Google Play
-    </a>
-  </div>
-
   <div class="container">
     <div id="slider" class="slider"></div>
 
-    <!-- Slide indicator dots -->
+    <!-- Slide dots -->
+    <div id="dots" class="dots"></div>
+  </div>
+
+</body>
+</html>
+<html lang="en">
+<head>
