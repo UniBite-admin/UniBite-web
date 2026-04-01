@@ -53,15 +53,22 @@
     }
 
     .slide {
-      flex: 0 0 90%;
-      scroll-snap-align: center;
-      background: white;
-      border-radius: 20px;
-      padding: 20px;
-      position: relative;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.12);
-      min-height: 360px;
-    }
+  flex: 0 0 90%;
+  scroll-snap-align: center;
+  background: white;
+  border-radius: 20px;
+  padding: 24px;
+  position: relative;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+
+  /* NEW: auto height */
+  min-height: auto;
+
+  /* NEW: center card content vertically on larger screens */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
 
     .slide h2 {
       margin-top: 0;
@@ -77,11 +84,17 @@
     }
 
     /* BLURRED SLIDES (4,5,6) */
-    .locked-blur {
-      filter: blur(6px);
-      opacity: 0.4;
-      pointer-events: none;
-    }
+  .locked-blur {
+  filter: blur(3px);        /* less blur */
+  opacity: 0.55;            /* more readable background */
+  pointer-events: none;
+}
+
+.title-readable {
+  filter: none !important;
+  opacity: 1 !important;
+}
+
 
     .title-readable {
       filter: none !important;
@@ -173,7 +186,21 @@
         if (s.locked) {
           const overlay = document.createElement("div");
           overlay.className = "overlay-lock";
-          overlay.textContent = "Install PopBite to unlock full slides";
+overlay.innerHTML = `
+  <a class="overlay-btn" href="https://play.google.com/store/apps/details?id=com.unibite.popbite">
+    Install PopBite to unlock full slides
+  </a>
+`;
+.overlay-btn {
+  background: #7F9CE0;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 24px;
+  text-decoration: none;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  font-size: 14px;
+}
           div.appendChild(overlay);
         }
 
