@@ -110,6 +110,27 @@
       position: relative;
       filter: none !important;
     }
+    /* SLIDE DOTS */
+.dots {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.45);
+  transition: background 0.25s, transform 0.25s;
+}
+
+.dot.active {
+  background: #23395D; /* app primaryDark */
+  transform: scale(1.25);
+}
   </style>
 
   <script type="module">
@@ -188,6 +209,30 @@
 
         slider.appendChild(card);
       });
+      // --- CREATE DOTS ---
+const dotsContainer = document.getElementById("dots");
+dotsContainer.innerHTML = "";
+
+SLIDES.forEach((_, i) => {
+  const d = document.createElement("div");
+  d.className = "dot" + (i === 0 ? " active" : "");
+  dotsContainer.appendChild(d);
+});
+
+// --- ACTIVATE DOT ON SCROLL ---
+const slider = document.getElementById("slider");
+
+slider.addEventListener("scroll", () => {
+  const slideWidth = slider.children[0].offsetWidth + 20; // card + gap
+  const index = Math.round(slider.scrollLeft / slideWidth);
+
+  const allDots = dotsContainer.querySelectorAll(".dot");
+  allDots.forEach((dot, i) => {
+    if (i === index) dot.classList.add("active");
+    else dot.classList.remove("active");
+  });
+});
+
     }
 
     window.onload = () => {
@@ -206,9 +251,12 @@
     </a>
   </div>
 
-  <div class="container">
-    <div id="slider" class="slider"></div>
-  </div>
+ <div class="container">
+  <div id="slider" class="slider"></div>
+
+  <!-- Slide indicator dots -->
+  <div id="dots" class="dots"></div>
+</div>
 
 </body>
 </html>
