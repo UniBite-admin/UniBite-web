@@ -2,45 +2,107 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>PopBite — Bite Preview</title>
+  <title>PopBite – Bite Preview</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+  <!-- Basic look & feel -->
   <style>
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Roboto", sans-serif;
-      background: linear-gradient(#B6D0E2, #7F9CE0);
+      font-family: -apple-system, BlinkMacSystemFont, "Roboto", sans-serif;
       margin: 0;
-      padding: 16px;
+      padding: 0;
+      background: linear-gradient(#B6D0E2, #7F9CE0);
       color: #333;
+      overflow-x: hidden;
     }
-    .container { max-width: 700px; margin: 0 auto; }
-    .card {
-      position: relative;
-      background: rgba(255,255,255,0.95);
-      border-radius: 16px;
-      padding: 16px 18px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-      margin-bottom: 12px;
+
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+      padding-top: 70px; /* space for CTA button */
     }
-    .card h2 { margin: 0 0 8px; font-size: 18px; font-weight: 700; }
-    .card p { font-size: 15px; line-height: 1.4; margin: 0; }
-    .blur-overlay {
-      position: absolute; inset: 0;
-      border-radius: inherit;
-      backdrop-filter: blur(6px);
-      background: rgba(255,255,255,0.6);
+
+    /* CTA button at top */
+    .cta {
+      position: fixed;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 99;
     }
-    .install-box { text-align: center; margin-top: 28px; }
+
     .install-button {
       display: inline-block;
       padding: 14px 22px;
       border-radius: 30px;
-      text-decoration: none;
       background: #7F9CE0;
       color: #fff;
       font-size: 16px;
-      font-weight: 600;
+      font-weight: bold;
+      text-decoration: none;
       box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+
+    /* Slider wrapper */
+    .slider {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      gap: 16px;
+      padding: 0 16px;
+    }
+
+    .slide {
+      flex: 0 0 90%;
+      scroll-snap-align: center;
+      background: white;
+      border-radius: 20px;
+      padding: 20px;
+      position: relative;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+      min-height: 360px;
+    }
+
+    .slide h2 {
+      margin-top: 0;
+      font-size: 20px;
+      font-weight: 700;
+      color: #23395D;
+    }
+
+    .slide p {
+      font-size: 16px;
+      line-height: 1.45;
+      white-space: pre-wrap;
+    }
+
+    /* BLURRED SLIDES (4,5,6) */
+    .locked-blur {
+      filter: blur(6px);
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    .title-readable {
+      filter: none !important;
+      opacity: 1 !important;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Lock overlay */
+    .overlay-lock {
+      position: absolute;
+      inset: 0;
+      border-radius: 20px;
+      backdrop-filter: blur(4px);
+      background: rgba(255,255,255,0.6);
+      z-index: 3;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      color: #23395D;
     }
   </style>
 
@@ -49,19 +111,17 @@
 
     const supabase = createClient(
       "https://qxcofmbryadnwknjgflh.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF4Y29mbWJyeWFkbndrbmpnZmxoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYyNDAxNjUsImV4cCI6MjA3MTgxNjE2NX0.qf7gsas6C7IUdwcXDV8642UMx67Afv54bizzQQ4o3rk"   // ← CRITICAL FIX
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF4Y29mbWJyeWFkbndrbmpnZmxoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYyNDAxNjUsImV4cCI6MjA3MTgxNjE2NX0.qf7gsas6C7IUdwcXDV8642UMx67Afv54bizzQQ4o3rk"
     );
 
-    function getQueryParam(param) {
-      const url = new URL(window.location.href);
-      return url.searchParams.get(param);
+    function getParam(name) {
+      return new URL(window.location.href).searchParams.get(name);
     }
 
     async function loadBite(biteId) {
       const { data, error } = await supabase
         .from("pb_profiles")
         .select(`
-          pop_bite_id,
           subtopic,
           title1, slide1,
           title2, slide2,
@@ -73,79 +133,73 @@
         .eq("pop_bite_id", biteId)
         .maybeSingle();
 
-      const container = document.getElementById("content");
-
-      if (error || !data) {
-        container.innerHTML = "<p>Could not load this PopBite.</p>";
+      if (!data) {
+        document.getElementById("slider").innerHTML =
+          "<p style='padding:20px;color:white;'>Could not load bite.</p>";
         return;
       }
 
-      renderBite(data);
+      renderSlides(data);
     }
 
-    function renderBite(bite) {
-      const container = document.getElementById("content");
-      container.innerHTML = "";
+    function renderSlides(bite) {
+      const slider = document.getElementById("slider");
 
-      const title = document.createElement("h1");
-      title.textContent = bite.subtopic || "PopBite";
-      title.style.textAlign = "center";
-      title.style.color = "#23395D";
-      title.style.marginBottom = "16px";
-      title.style.fontSize = "22px";
-      title.style.fontWeight = "700";
-      container.appendChild(title);
+      const slides = [
+        { title: bite.title1, body: bite.slide1, locked: false },
+        { title: bite.title2, body: bite.slide2, locked: false },
+        { title: bite.title3, body: bite.slide3, locked: false },
+        { title: bite.title4, body: bite.slide4, locked: true },
+        { title: bite.title5, body: bite.slide5, locked: true },
+        { title: bite.title6, body: bite.slide6, locked: true },
+      ];
 
-      function addSlide(title, text, blurred) {
-        const card = document.createElement("div");
-        card.className = "card";
+      slides.forEach((s) => {
+        const div = document.createElement("div");
+        div.className = "slide";
 
-        const h2 = document.createElement("h2");
-        h2.textContent = title || "";
-        card.appendChild(h2);
+        // Title ALWAYS readable
+        const title = document.createElement("h2");
+        title.className = s.locked ? "title-readable" : "";
+        title.textContent = s.title;
+        div.appendChild(title);
 
-        const p = document.createElement("p");
-        p.textContent = text || "";
-        card.appendChild(p);
+        const text = document.createElement("p");
+        text.textContent = s.body;
+        if (s.locked) text.className = "locked-blur";
+        div.appendChild(text);
 
-        if (blurred) {
+        // Overlay lock for S4-S6
+        if (s.locked) {
           const overlay = document.createElement("div");
-          overlay.className = "blur-overlay";
-          card.appendChild(overlay);
+          overlay.className = "overlay-lock";
+          overlay.textContent = "Install PopBite to unlock full slides";
+          div.appendChild(overlay);
         }
 
-        container.appendChild(card);
-      }
-
-      addSlide(bite.title1, bite.slide1, false);
-      addSlide(bite.title2, bite.slide2, false);
-      addSlide(bite.title3, bite.slide3, false);
-
-      addSlide(bite.title4, bite.slide4, true);
-      addSlide(bite.title5, bite.slide5, true);
-      addSlide(bite.title6, bite.slide6, true);
+        slider.appendChild(div);
+      });
     }
 
-    window.onload = async () => {
-      const id = getQueryParam("bite");
-      if (!id) {
-        document.getElementById("content").innerHTML = "<p>No bite found.</p>";
-        return;
-      }
-      await loadBite(id);
+    window.onload = () => {
+      const biteId = getParam("bite");
+      if (biteId) loadBite(biteId);
     };
   </script>
 </head>
 
 <body>
-  <div class="container">
-    <div id="content">Loading…</div>
+  <!-- CTA button on top -->
+  <div class="cta">
+    https://play.google.com/store/apps/details?id=com.unibite.popbite
+      Install PopBite on Google Play
+    </a>
+  </div>
 
-    <div class="install-box">
-      <a class="install-button"
-         href="https://play.google.com/store/apps/details?id=com.unibite.popbite">
-        Install PopBite on Google Play
-      </a>
+  <div class="container">
+    <!-- HORIZONTAL SLIDER -->
+    <div id="slider" class="slider">
+      <!-- Slides injected here -->
     </div>
   </div>
 </body>
