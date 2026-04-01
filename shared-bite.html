@@ -1,18 +1,47 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>PopBite Bite Preview</title>
+  <title>PopBite — Bite Preview</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <style>
-    body { font-family: system-ui; margin: 0; padding: 16px;
-           background: linear-gradient(#B6D0E2, #7F9CE0); }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Roboto", sans-serif;
+      background: linear-gradient(#B6D0E2, #7F9CE0);
+      margin: 0;
+      padding: 16px;
+      color: #333;
+    }
     .container { max-width: 700px; margin: 0 auto; }
-    .card { background: white; padding: 16px; border-radius: 12px;
-            margin-bottom: 16px; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    .blur { backdrop-filter: blur(6px); background: rgba(255,255,255,0.6);
-            position: absolute; inset: 0; border-radius: 12px; }
+    .card {
+      position: relative;
+      background: rgba(255,255,255,0.95);
+      border-radius: 16px;
+      padding: 16px 18px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+      margin-bottom: 12px;
+    }
+    .card h2 { margin: 0 0 8px; font-size: 18px; font-weight: 700; }
+    .card p { font-size: 15px; line-height: 1.4; margin: 0; }
+    .blur-overlay {
+      position: absolute; inset: 0;
+      border-radius: inherit;
+      backdrop-filter: blur(6px);
+      background: rgba(255,255,255,0.6);
+    }
+    .install-box { text-align: center; margin-top: 28px; }
+    .install-button {
+      display: inline-block;
+      padding: 14px 22px;
+      border-radius: 30px;
+      text-decoration: none;
+      background: #7F9CE0;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
   </style>
 
   <script type="module">
@@ -20,57 +49,104 @@
 
     const supabase = createClient(
       "https://qxcofmbryadnwknjgflh.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF4Y29mbWJyeWFkbndrbmpnZmxoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYyNDAxNjUsImV4cCI6MjA3MTgxNjE2NX0.qf7gsas6C7IUdwcXDV8642UMx67Afv54bizzQQ4o3rk"
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF4Y29mbWJyeWFkbndrbmpnZmxoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYyNDAxNjUsImV4cCI6MjA3MTgxNjE2NX0.qf7gsas6C7IUdwcXDV8642UMx67Afv54bizzQQ4o3rk"   // ← CRITICAL FIX
     );
 
-    const params = new URLSearchParams(window.location.search);
-    const biteId = params.get("bite");
+    function getQueryParam(param) {
+      const url = new URL(window.location.href);
+      return url.searchParams.get(param);
+    }
 
-    async function load() {
-      if (!biteId) return;
-
-      const { data } = await supabase
+    async function loadBite(biteId) {
+      const { data, error } = await supabase
         .from("pb_profiles")
-        .select("*")
+        .select(`
+          pop_bite_id,
+          subtopic,
+          title1, slide1,
+          title2, slide2,
+          title3, slide3,
+          title4, slide4,
+          title5, slide5,
+          title6, slide6
+        `)
         .eq("pop_bite_id", biteId)
         .maybeSingle();
 
-      if (!data) return;
+      const container = document.getElementById("content");
 
-      const c = document.getElementById("content");
-
-      function add(title, text, blurred = false) {
-        const card = document.createElement("div");
-        card.className = "card";
-        card.innerHTML = `<h2>${title}</h2><p>${text}</p>`;
-        if (blurred) {
-          const blur = document.createElement("div");
-          blur.className = "blur";
-          card.appendChild(blur);
-        }
-        c.appendChild(card);
+      if (error || !data) {
+        container.innerHTML = "<p>Could not load this PopBite.</p>";
+        return;
       }
 
-      add(data.title1, data.slide1);
-      add(data.title2, data.slide2);
-      add(data.title3, data.slide3);
-      add(data.title4, data.slide4, true);
-      add(data.title5, data.slide5, true);
-      add(data.title6, data.slide6, true);
+      renderBite(data);
     }
 
-    load();
+    function renderBite(bite) {
+      const container = document.getElementById("content");
+      container.innerHTML = "";
+
+      const title = document.createElement("h1");
+      title.textContent = bite.subtopic || "PopBite";
+      title.style.textAlign = "center";
+      title.style.color = "#23395D";
+      title.style.marginBottom = "16px";
+      title.style.fontSize = "22px";
+      title.style.fontWeight = "700";
+      container.appendChild(title);
+
+      function addSlide(title, text, blurred) {
+        const card = document.createElement("div");
+        card.className = "card";
+
+        const h2 = document.createElement("h2");
+        h2.textContent = title || "";
+        card.appendChild(h2);
+
+        const p = document.createElement("p");
+        p.textContent = text || "";
+        card.appendChild(p);
+
+        if (blurred) {
+          const overlay = document.createElement("div");
+          overlay.className = "blur-overlay";
+          card.appendChild(overlay);
+        }
+
+        container.appendChild(card);
+      }
+
+      addSlide(bite.title1, bite.slide1, false);
+      addSlide(bite.title2, bite.slide2, false);
+      addSlide(bite.title3, bite.slide3, false);
+
+      addSlide(bite.title4, bite.slide4, true);
+      addSlide(bite.title5, bite.slide5, true);
+      addSlide(bite.title6, bite.slide6, true);
+    }
+
+    window.onload = async () => {
+      const id = getQueryParam("bite");
+      if (!id) {
+        document.getElementById("content").innerHTML = "<p>No bite found.</p>";
+        return;
+      }
+      await loadBite(id);
+    };
   </script>
 </head>
 
 <body>
   <div class="container">
-    <h1 style="text-align:center; color:#23395D;">PopBite Preview</h1>
-    <div id="content">Loading...</div>
+    <div id="content">Loading…</div>
 
-    https://play.google.com/store/apps/details?id=com.unibite.popbite
-      Get PopBite on Google Play
-    </a>
+    <div class="install-box">
+      <a class="install-button"
+         href="https://play.google.com/store/apps/details?id=com.unibite.popbite">
+        Install PopBite on Google Play
+      </a>
+    </div>
   </div>
 </body>
 </html>
