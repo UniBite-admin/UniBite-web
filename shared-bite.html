@@ -5,7 +5,6 @@
   <title>PopBite – Bite Preview</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- Basic look & feel -->
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Roboto", sans-serif;
@@ -14,18 +13,27 @@
       background: linear-gradient(#B6D0E2, #7F9CE0);
       color: #333;
       overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
     .container {
       max-width: 700px;
-      margin: 40 auto;
-      padding-top: 70px; /* space for CTA button */
+      width: 100%;
+      margin: 0 auto;
+      padding-top: 90px; /* space for CTA */
+      padding-bottom: 40px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
-    /* CTA button at top */
+    /* CTA button pinned at top */
     .cta {
       position: fixed;
-      top: 12px;
+      top: 14px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 99;
@@ -33,45 +41,41 @@
 
     .install-button {
       display: inline-block;
-      padding: 14px 22px;
-      border-radius: 30px;
+      padding: 12px 26px;
+      border-radius: 28px;
       background: #7F9CE0;
       color: #fff;
       font-size: 16px;
-      font-weight: bold;
+      font-weight: 600;
       text-decoration: none;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      box-shadow: 0 3px 10px rgba(0,0,0,0.18);
     }
 
-    /* Slider wrapper */
+    /* Horizontal slider */
     .slider {
       display: flex;
       overflow-x: auto;
       scroll-snap-type: x mandatory;
-      gap: 16px;
-      padding: 0 16px;
+      gap: 20px;
+      padding: 0 20px;
     }
 
+    /* Slide card */
     .slide {
-  flex: 0 0 90%;
-  scroll-snap-align: center;
-  background: white;
-  border-radius: 20px;
-  padding: 24px;
-  position: relative;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.12);
-
-  /* NEW: auto height */
-  min-height: auto;
-
-  /* NEW: center card content vertically on larger screens */
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-}
+      flex: 0 0 90%;
+      scroll-snap-align: center;
+      background: white;
+      border-radius: 20px;
+      padding: 24px;
+      position: relative;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.15);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
 
     .slide h2 {
-      margin-top: 0;
+      margin: 0 0 12px 0;
       font-size: 20px;
       font-weight: 700;
       color: #23395D;
@@ -81,21 +85,17 @@
       font-size: 16px;
       line-height: 1.45;
       white-space: pre-wrap;
+      margin: 0;
     }
 
-    /* BLURRED SLIDES (4,5,6) */
-  .locked-blur {
-  filter: blur(3px);        /* less blur */
-  opacity: 0.55;            /* more readable background */
-  pointer-events: none;
-}
+    /* BODY blur for locked slides */
+    .locked-blur {
+      filter: blur(3px);
+      opacity: 0.50;
+      pointer-events: none;
+    }
 
-.title-readable {
-  filter: none !important;
-  opacity: 1 !important;
-}
-
-
+    /* Title ALWAYS readable */
     .title-readable {
       filter: none !important;
       opacity: 1 !important;
@@ -103,19 +103,31 @@
       z-index: 2;
     }
 
-    /* Lock overlay */
+    /* Lock overlay with button */
     .overlay-lock {
       position: absolute;
       inset: 0;
       border-radius: 20px;
       backdrop-filter: blur(4px);
-      background: rgba(255,255,255,0.6);
+      background: rgba(255,255,255,0.65);
       z-index: 3;
       display: flex;
       justify-content: center;
       align-items: center;
-      font-weight: bold;
-      color: #23395D;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .overlay-btn {
+      background: #7F9CE0;
+      color: #fff;
+      text-decoration: none;
+      padding: 12px 22px;
+      border-radius: 24px;
+      font-weight: 600;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+      font-size: 15px;
+      display: inline-block;
     }
   </style>
 
@@ -124,7 +136,7 @@
 
     const supabase = createClient(
       "https://qxcofmbryadnwknjgflh.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF4Y29mbWJyeWFkbndrbmpnZmxoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYyNDAxNjUsImV4cCI6MjA3MTgxNjE2NX0.qf7gsas6C7IUdwcXDV8642UMx67Afv54bizzQQ4o3rk"
+      "YOUR_SUPABASE_ANON_KEY_HERE"
     );
 
     function getParam(name) {
@@ -148,7 +160,7 @@
 
       if (!data) {
         document.getElementById("slider").innerHTML =
-          "<p style='padding:20px;color:white;'>Could not load bite.</p>";
+          "<p style='color:white;padding:20px;text-align:center;'>Could not load PopBite.</p>";
         return;
       }
 
@@ -168,43 +180,33 @@
       ];
 
       slides.forEach((s) => {
-        const div = document.createElement("div");
-        div.className = "slide";
+        const card = document.createElement("div");
+        card.className = "slide";
 
-        // Title ALWAYS readable
         const title = document.createElement("h2");
-        title.className = s.locked ? "title-readable" : "";
         title.textContent = s.title;
-        div.appendChild(title);
+        if (s.locked) title.className = "title-readable";
+        card.appendChild(title);
 
         const text = document.createElement("p");
         text.textContent = s.body;
         if (s.locked) text.className = "locked-blur";
-        div.appendChild(text);
+        card.appendChild(text);
 
-        // Overlay lock for S4-S6
         if (s.locked) {
           const overlay = document.createElement("div");
           overlay.className = "overlay-lock";
-overlay.innerHTML = `
-  <a class="overlay-btn" href="https://play.google.com/store/apps/details?id=com.unibite.popbite">
-    Install PopBite to unlock full slides
-  </a>
-`;
-.overlay-btn {
-  background: #7F9CE0;
-  color: #fff;
-  padding: 10px 20px;
-  border-radius: 24px;
-  text-decoration: none;
-  font-weight: 600;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  font-size: 14px;
-}
-          div.appendChild(overlay);
+
+          overlay.innerHTML = `
+            https://play.google.com/store/apps/details?id=com.unibite.popbite
+              Install PopBite to unlock full slides
+            </a>
+          `;
+
+          card.appendChild(overlay);
         }
 
-        slider.appendChild(div);
+        slider.appendChild(card);
       });
     }
 
@@ -216,7 +218,7 @@ overlay.innerHTML = `
 </head>
 
 <body>
-  <!-- CTA button on top -->
+  <!-- CTA button fixed on top -->
   <div class="cta">
     https://play.google.com/store/apps/details?id=com.unibite.popbite
       Install PopBite on Google Play
@@ -224,7 +226,6 @@ overlay.innerHTML = `
   </div>
 
   <div class="container">
-    <!-- HORIZONTAL SLIDER -->
     <div id="slider" class="slider">
       <!-- Slides injected here -->
     </div>
