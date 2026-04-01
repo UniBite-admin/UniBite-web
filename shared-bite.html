@@ -197,11 +197,18 @@
           const overlay = document.createElement("div");
           overlay.className = "overlay-lock";
 
-          overlay.innerHTML = `
-            https://play.google.com/store/apps/details?id=com.unibite.popbite
-              Install PopBite to unlock full slides
-            </a>
-          `;
+        if (s.locked) {
+  const overlay = document.createElement("div");
+  overlay.className = "overlay-lock";
+
+  const btn = document.createElement("a");
+  btn.href = "https://play.google.com/store/apps/details?id=com.unibite.popbite";
+  btn.className = "overlay-btn";
+  btn.textContent = "Install PopBite to unlock full slides";
+
+  overlay.appendChild(btn);
+  card.appendChild(overlay);
+}
 
           card.appendChild(overlay);
         }
