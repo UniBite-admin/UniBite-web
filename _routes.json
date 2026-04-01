@@ -1,13 +1,5 @@
 {
   "version": 1,
-  "routes": [
-    {
-      "pattern": "/r/*",
-      "function": { "path": "r/[code].js" }
-    },
-    {
-      "pattern": "/*",
-      "serve": { "path": "index.html" }
-    }
-  ]
+  "include": ["/*"],
+  "exclude": []
 }
