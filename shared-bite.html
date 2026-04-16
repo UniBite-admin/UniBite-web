@@ -130,7 +130,7 @@
       return new URL(window.location.href).searchParams.get(name);
     }
 
-    async function loadBite(id) {
+    async function loadBite(uuid) {
       const { data } = await supabase
         .from("pb_profiles")
         .select(`
@@ -142,7 +142,7 @@
           title5, slide5,
           title6, slide6
         `)
-        .eq("pop_bite_id", id)
+    .eq("profile_uuid", uuid)
         .maybeSingle();
 
       if (!data) {
@@ -153,6 +153,11 @@
 
       renderSlides(data);
     }
+
+window.onload = () => {
+  const uuid = getParam("bite");
+  if (uuid) loadBite(uuid);
+};
 
     function renderSlides(bite) {
       const sliderEl = document.getElementById("slider");
