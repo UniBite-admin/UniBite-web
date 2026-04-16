@@ -3,8 +3,36 @@ export async function onRequest(context) {
   const url = new URL(request.url);
 
   const referralCode = params.code;
-  const biteId = url.searchParams.get("bite") || null;
+const biteToken = url.searchParams.get("bite") || null;
 
+let popBiteId = null;
+
+// UUID detection
+const uuidRegex =
+  /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/;
+
+if (biteToken && uuidRegex.test(biteToken)) {
+  // ✅ Resolve UUID → pop_bite_id
+  try {
+    const res = await fetch(
+      `${env.SUPABASE_URL}/rest/v1/pb_profiles?select=pop_bite_id&profile_uuid=eq.${biteToken}`,
+      {
+        headers: {
+          apikey: env.SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${env.SUPABASE_ANON_KEY}`,
+        },
+      }
+    );
+
+    const rows = await res.json();
+    popBiteId = rows?.[0]?.pop_bite_id ?? null;
+  } catch (e) {
+    console.error("UUID → pop_bite_id lookup failed", e);
+  }
+} else {
+  // ✅ Backward compatibility (old links)
+  popBiteId = biteToken;
+}
   // Device cookie logic
   const cookies = request.headers.get("Cookie") || "";
   let deviceId = readCookie(cookies, "ub_device_id");
@@ -24,7 +52,7 @@ export async function onRequest(context) {
       body: JSON.stringify({
         p_referral_code: referralCode,
         p_device_id: deviceId,
-        p_bite_id: biteId,
+        p_bite_id: popBiteId,
       }),
     });
   } catch (e) {
@@ -32,9 +60,13 @@ export async function onRequest(context) {
   }
 
   // Serve shared-bite.html ALWAYS (browser fallback)
-  const landing = await context.env.ASSETS.fetch(
-    new URL("/shared-bite.html", request.url)
-  );
+  const landingUrl = new URL("/shared-bite.html", request.url);
+
+if (popBiteId) {
+  landingUrl.searchParams.set("bite", popBiteId);
+}
+
+const landing = await context.env.ASSETS.fetch(landingUrl);
 
   const response = new Response(landing.body, {
     status: 200,
