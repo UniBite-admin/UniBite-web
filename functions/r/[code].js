@@ -59,31 +59,30 @@ if (biteToken && uuidRegex.test(biteToken)) {
     console.error("Supabase RPC error:", e);
   }
 
-  // Serve shared-bite.html ALWAYS (browser fallback)
-  const landingUrl = new URL("/shared-bite.html", request.url);
+ // ✅ Redirect browser to shared-bite.html with RESOLVED popBiteId
+const redirectUrl = new URL(request.url);
+redirectUrl.pathname = "/shared-bite.html";
 
+// Overwrite bite param so the browser page gets pop_bite_id
 if (popBiteId) {
-  landingUrl.searchParams.set("bite", popBiteId);
+  redirectUrl.searchParams.set("bite", popBiteId);
+} else {
+  // optional: clean up invalid bite param
+  redirectUrl.searchParams.delete("bite");
 }
 
-const landing = await context.env.ASSETS.fetch(landingUrl);
+const response = Response.redirect(redirectUrl.toString(), 302);
 
-  const response = new Response(landing.body, {
-    status: 200,
-    headers: {
-      "Content-Type": "text/html;charset=UTF-8",
-      "Cache-Control": "no-store",
-    },
-  });
+// Preserve device cookie logic
+if (isNewDevice) {
+  response.headers.append(
+    "Set-Cookie",
+    `ub_device_id=${deviceId}; Path=/; Max-Age=31536000; Secure; SameSite=Lax`
+  );
+}
 
-  if (isNewDevice) {
-    response.headers.append(
-      "Set-Cookie",
-      `ub_device_id=${deviceId}; Path=/; Max-Age=31536000; Secure; SameSite=Lax`
-    );
-  }
-
-  return response;
+response.headers.set("Cache-Control", "no-store");
+return response;
 }
 
 function readCookie(header, name) {
