@@ -71,9 +71,26 @@ if (popBiteId) {
   redirectUrl.searchParams.delete("bite");
 }
 
-const response = Response.redirect(redirectUrl.toString(), 302);
+// ✅ Redirect browser to shared-bite.html with RESOLVED popBiteId
+const redirectUrl = new URL(request.url);
+redirectUrl.pathname = "/shared-bite.html";
 
-// Preserve device cookie logic
+// Overwrite bite param so browser page receives pop_bite_id
+if (popBiteId) {
+  redirectUrl.searchParams.set("bite", popBiteId);
+} else {
+  redirectUrl.searchParams.delete("bite");
+}
+
+// ✅ Create a mutable Response (NOT Response.redirect)
+const response = new Response(null, {
+  status: 302,
+  headers: {
+    Location: redirectUrl.toString(),
+    "Cache-Control": "no-store",
+  },
+});
+
 if (isNewDevice) {
   response.headers.append(
     "Set-Cookie",
@@ -81,7 +98,6 @@ if (isNewDevice) {
   );
 }
 
-response.headers.set("Cache-Control", "no-store");
 return response;
 }
 
