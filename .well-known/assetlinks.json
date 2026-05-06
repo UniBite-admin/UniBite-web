@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.unibite.popbite",
+      "sha256_cert_fingerprints": [
+        "F5:0B:D7:53:84:CD:65:79:18:57:99:80:F3:06:2E:DA:42:D4:4C:B4:1D:50:2F:20:D8:A3:77:46:FD:EA:EE:10"
+      ]
+    }
+  }
+]
